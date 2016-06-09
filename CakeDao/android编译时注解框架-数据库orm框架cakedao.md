@@ -39,6 +39,7 @@ GreenDao、OrmLite、Active Android 等等等等~
 
 有的，就是我们今天介绍的CakeDao。
 
+Github及引用地址：[https://github.com/lizhaoxuan/CakeDao](https://github.com/lizhaoxuan/CakeDao)
 
 ###2.使用
 
