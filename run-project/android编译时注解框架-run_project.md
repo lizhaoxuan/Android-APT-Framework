@@ -39,7 +39,7 @@ OK，这是一个功能非常简单的小型类库。下面我们来实现它。
 
 具体的项目搭建细节前一章已经有了介绍，这里不再讲述。
 
-**需要说明的是：**我们的目的是写一个Android库，APT Moudle是java Library，不能使用Android API。所以还需要创建一个Android Library，负责框架主题部分. 然后由Android Library引用APT jar包。
+**需要说明的是：**我们的目的是写一个Android库，APT Moudle是java Library，不能使用Android API。所以还需要创建一个Android Library，负责框架主体部分. 然后由Android Library引用APT jar包。
 
 项目目录结构如图：
 

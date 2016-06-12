@@ -20,17 +20,17 @@
 
 ###1.概述
 
-提到注解，普遍都会有两种态度：黑科技、低性能。使用注解往往可以实现用非常少的代码作出匪夷所思的事情，比如DataBinding、ButterKnife、Retrofit。但运行时注解会因为java反射而引起一些性能问题。
+提到注解，普遍都会有两种态度：黑科技、低性能。使用注解往往可以实现用非常少的代码作出匪夷所思的事情，比如这些框架：DataBinding、ButterKnife、Retrofit。但一直被人呕病的是，运行时注解会因为java反射而引起较为严重的性能问题。
 
-而今天我们要讲的就是，不会对性能有任何影响的黑科技：**编译时注解**。通常也叫它：**代码生成**。在编译时对注解做处理，生成代码，运行时和直接运行代码没有任何区别。
+今天我们要讲的是，不会对性能有任何影响的黑科技：**编译时注解**。通常也叫它：**代码生成**。在编译时对注解做处理，生成代码，运行时和直接运行代码没有任何区别。
 
-得当的使用编译时注解，可以极大的提高开发效率，避免编写重复代码。大部分时候编译时注解都可以代替java反射，利用可以直接调用的代码代替反射，极大的提升运行效率。
+得当的使用编译时注解，可以极大的提高开发效率，避免编写重复、易错的代码。大部分时候编译时注解都可以代替java反射，利用可以直接调用的代码代替反射，极大的提升运行效率。
 
 本章作为《Android编译时注解框架》系列的第一章，将分三个部分让你简单认识注解框架。之后我们会一步步的创建属于自己的编译时注解框架。
 
 - 什么是注解
 
-- 运行时注解的简单实用
+- 运行时注解的简单使用
 
 - 编译时注解框架ButterKnife源码初探
 
@@ -51,7 +51,7 @@
 
 - 元 Annotation
 
-	@Retention, @Target, @Inherited, @Documented，它们是用来定义 Annotation 的 Annotation。也就是当我们需要自定义注解时，需要通过他们来实现。
+	@Retention, @Target, @Inherited, @Documented，它们是用来定义 Annotation 的 Annotation。也就是当我们要自定义注解时，需要通过他们来实现。
 	
 - 自定义 Annotation
 	
@@ -62,11 +62,11 @@
 
 - @Retention(RetentionPolicy.SOURCE)
 
-	源码时注解，一般用来作为编译器标记。就比如Override, Deprecated, SuppressWarnings这样的注解。（这个我们一般都很少自定义的）
+	源码时注解，一般用来作为编译器标记。就比如Override, Deprecated, SuppressWarnings这样的注解。（这个我们一般都很少自定义）
 	
 - @Retention(RetentionPolicy.RUNTIME)
 
-	运行时注解，一般在运行时通过反射去识别的注解。
+	运行时注解，在运行时通过反射去识别的注解。
 
 - @Retention(RetentionPolicy.CLASS)
 
@@ -79,7 +79,7 @@
 
 
 
-###3.运行时注解的简单实用
+###3.运行时注解的简单使用
 
 
 运行时注解的实质是，在代码中通过注解进行标记，运行时通过反射寻找标记进行某种处理。而运行时注解一直以来被呕病的原因便是反射的低效。
@@ -124,7 +124,10 @@
 
 **第三行：public @interface ContentView**
 
-这里的interface并不是说ContentView是一个接口。就像申明类用关键字class。申明枚举用enum。申明注解用的就是@interface。
+这里的interface并不是说ContentView是一个接口。就像申明类用关键字class。申明枚举用enum。申明注解用的就是@interface。（值得注意的是：在ElementType的分类中，class、interface、Annotation、enum同属一类为Type，并且从官方注解来看，似乎interface是包含@interface的）
+
+	/** Class, interface (including annotation type), or enum declaration */
+	TYPE,
 
 **第四行：int value();**
 
@@ -188,7 +191,7 @@ R.layout.activity_home实质是一个int型id，如果这样用就会报错：
 
 但你要知道，这只是注解最简单的应用方式。举一个例子：AndroidEventBus的注解是运行时注解，虽然会有一点性能问题，但是在开发效率上是有提高的。
 
-因为这篇博客的重点不是运行时注解，所以我们不对其源码进行解析。有兴趣的可以去github搜一下看看哦~话说AndroidEventBus还是我学长写得。
+因为这篇博客的重点不是运行时注解，所以我们不对其源码进行解析。有兴趣的可以去github搜一下看看哦~话说AndroidEventBus还是我一个学长写得，haha~。
 
 
 ###4.编译时注解框架ButterKnife源码初探
@@ -222,6 +225,7 @@ ButterKnife大家应该都很熟悉的吧，9000多颗start，让我们彻底告
 		//accountEdit是ForgetActivity当中定义的控件
 	    target.accountEdit = finder.castView(view, 2131558541, "field 'accountEdit'");
 
+所以你也应该知道了为什么当使用private时会报错了吧？
 
 2.我们不去管细节，只是大概看一下这段生成的代码是什么意思。我把解析写在注释里。
 
@@ -374,6 +378,7 @@ ForgetActivity$$ViewBinder中所有代码，都是通过bindingClass.brewJava方
 
 4.ButterKnife的原理其实很简单，可是为什么这么简单的功能，却写了那么多代码呢？因为ButterKnife作为一个外部依赖框架，做了大量的容错和效验来保证运行稳定。所以：**写一个框架最难的不是技术实现，而是稳定！**
 
+5.ButterKnife有一个非常值得借鉴的地方，就是如何用生成的代码对已有的代码进行代理执行。这个如果你在研究有代理功能的APT框架的话，应该好好研究一下。
 
 APT就好像一块蛋糕摆在你面前，就看你如何优雅的吃了。
 
