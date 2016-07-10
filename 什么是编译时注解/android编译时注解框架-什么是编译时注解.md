@@ -20,9 +20,9 @@
 
 ###1.概述
 
-提到注解，普遍都会有两种态度：黑科技、低性能。使用注解往往可以实现用非常少的代码作出匪夷所思的事情，比如这些框架：DataBinding、ButterKnife、Retrofit。但一直被人呕病的是，运行时注解会因为java反射而引起较为严重的性能问题。
+提到注解，普遍都会有两种态度：黑科技、低性能。使用注解往往可以实现用非常少的代码作出匪夷所思的事情，比如这些框架：ButterKnife、Retrofit。但一直被人呕病的是，运行时注解会因为java反射而引起较为严重的性能问题。
 
-今天我们要讲的是，不会对性能有任何影响的黑科技：**编译时注解**。通常也叫它：**代码生成**。在编译时对注解做处理，生成代码，运行时和直接运行代码没有任何区别。
+今天我们要讲的是，不会对性能有任何影响的黑科技：**编译时注解**。也有人叫它**代码生成**，其实他们还是有些区别的，在编译时对注解做处理，通过注解，获取必要信息，在项目中生成代码，运行时调用，和直接运行手写代码没有任何区别。而更准确的叫法：APT - Annotation Processing Tool
 
 得当的使用编译时注解，可以极大的提高开发效率，避免编写重复、易错的代码。大部分时候编译时注解都可以代替java反射，利用可以直接调用的代码代替反射，极大的提升运行效率。
 
@@ -43,26 +43,27 @@
 ![](./1.jpeg)
 
 
-如果你对注解有过些微研究的话，你应该知道注解分为三类，：
+首先注解分为三类，：
 
 - 标准 Annotation
 
-	包括 Override, Deprecated, SuppressWarnings，是java自带的几个注解，他们是由编译器来识别的，不会进行编译，对代码运行不会造成任何影响，至于他们的含义不是这篇博客的重点，不再讲述。
+	包括 Override, Deprecated, SuppressWarnings，是java自带的几个注解，他们由编译器来识别，不会进行编译，
+	不影响代码运行，至于他们的含义不是这篇博客的重点，这里不再讲述。
 
 - 元 Annotation
 
-	@Retention, @Target, @Inherited, @Documented，它们是用来定义 Annotation 的 Annotation。也就是当我们要自定义注解时，需要通过他们来实现。
+	@Retention, @Target, @Inherited, @Documented，它们是用来定义 Annotation 的 Annotation。也就是当我们要自定义注解时，需要使用它们。
 	
 - 自定义 Annotation
 	
 	根据需要，自定义的Annotation。而自定义的方式，下面我们会讲到。
 	
 
-你知道了可以自定义Annotation后，就应该知道，自定义的Annotation同样分为三类。都通过元Annotation - @Retention 定义：
+同样，自定义的注解也分为三类，通过元Annotation - @Retention 定义：
 
 - @Retention(RetentionPolicy.SOURCE)
 
-	源码时注解，一般用来作为编译器标记。就比如Override, Deprecated, SuppressWarnings这样的注解。（这个我们一般都很少自定义）
+	源码时注解，一般用来作为编译器标记。如Override, Deprecated, SuppressWarnings。
 	
 - @Retention(RetentionPolicy.RUNTIME)
 
@@ -70,12 +71,8 @@
 
 - @Retention(RetentionPolicy.CLASS)
 
-	编译时注解，这是我们重点要讲的。在编译时被识别并处理的注解。
+	编译时注解，在编译时被识别并处理的注解，这是本章重点。
 
-
-
-
-我们主要讲的就是编译时注解，俗称代码生成。技术实现依赖是**APT(Annotation Processing Tool) **。
 
 
 
@@ -86,7 +83,7 @@
 
 下面展示一个Demo。其功能是通过注解实现布局文件的设置。
 
-比如之前我们是这样设置布局文件的：
+之前我们是这样设置布局文件的：
 
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -140,7 +137,7 @@ R.layout.activity_home实质是一个int型id，如果这样用就会报错：
 	@ContentView(“string”)
 	
 
-**关于注解的详细语法，这篇不在详述，统一放到《Android编译时注解框架-语法讲解》中**
+**关于注解的具体语法，这篇不在详述，统一放到《Android编译时注解框架-语法讲解》中**
 
 
 #####3.2 注解解析
@@ -185,7 +182,7 @@ R.layout.activity_home实质是一个int型id，如果这样用就会报错：
 
 #####3.3 总结
 
-看完这个，相信你对运行时注解的使用一定有了一些理解了。也知道了运行时注解被人呕病的地方放在哪了。
+相信你现在对运行时注解的使用一定有了一些理解了。也知道了运行时注解被人呕病的地方在哪了。
 
 你可能会觉得*setContentView(R.layout.activity_home)*和*@ContentView(R.layout.activity_home)*没什么区别，用了注解反而还增加了性能问题。
 
@@ -202,7 +199,7 @@ ButterKnife大家应该都很熟悉的吧，9000多颗start，让我们彻底告
 
 你难道就没有好奇过，它是怎么实现的吗？嘿嘿，这就是编译时注解-代码生成的黑科技所在了。
 
-秘密在这里，编译工程后，打开你的项目下app目录下的build目录：
+秘密在这里，编译工程后，打开你的项目app目录下的build目录：
 
 ![](./3.jpeg)
 
@@ -276,7 +273,7 @@ OK，现在你大致明白了ButterKnife的秘密了吧？通过自动生成代�
 3.属性值是一个int型的数组。
 
 
-创建好自定义注解以后，之后我们就可以通过APT去识别解析到这些注解，并且可以通过这些注解得到注解的值、注解所修饰的类的类型、名称。注解所在类的名称等等信息。
+创建好自定义注解，之后我们就可以通过APT去识别解析到这些注解，并且可以通过这些注解得到注解的值、注解所修饰的类的类型、名称。注解所在类的名称等等信息。
 
 #####4.2 Finder类
 
