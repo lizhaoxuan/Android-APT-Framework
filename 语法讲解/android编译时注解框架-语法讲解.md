@@ -34,9 +34,9 @@
 
 Annotation里面的参数该设定: 
 
-第一,只能用public或默认(default)这两个访问权修饰.例如,String value();这里把方法设为defaul默认类型；　 　
+第一,只能用public或默认(default)这两个访问权修饰.例如,String value();不能是private；　 　
 
-第二,参数成员只能用基本类型byte,short,char,int,long,float,double,boolean八种基本数据类型和 String,Enum,Class,annotations等数据类型,以及这一些类型的数组.例如,String value();这里的参数成员就为String;　　
+第二,参数只能使用基本类型byte,short,char,int,long,float,double,boolean八种基本数据类型和 String,Enum,Class,annotations等数据类型,以及这一些类型的数组.例如,String value();这里的参数类型就为String;　　
 
 	@Retention(RetentionPolicy.CLASS)
 	@Target(ElementType.TYPE)
@@ -63,7 +63,8 @@ Annotation里面的参数该设定:
 	class Test{
 	}
 	
-参数为value时，可以直接写入参数。
+参数为value时，可以直接写入参数,使用时不在需要key=value写法。
+但当有多个参数时，不可以再使用value。
 
 	
 #####2.1 @Retention

@@ -125,7 +125,7 @@ Processor是用来处理Annotation的类。继承自AbstractProcessor。
 
 3.Diagnostic.Kind.NOTE 类似于Log.d Log.e这样的等级。
 
-4.return true;表示该Process依据处理了，其他的Process不需要再处理了。
+4.return true;表示该Process已经处理了，其他的Process不需要再处理了。
 
 #####2.5 配置
 
