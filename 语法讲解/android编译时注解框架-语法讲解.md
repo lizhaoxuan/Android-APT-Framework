@@ -19,16 +19,19 @@
 ==============
 
 
-###1.概述
+### 概述
 
 本章内容主要对APT一些语法进行简单讲解。apt的学习资料真的太少了，我的学习方法基本上只能通过看开源库的源码猜、看源码注释猜、自己运行着猜……
 
 这里对猜对的结果进行一个总结，让后来者可以更快的上手。
 
+<!-- more -->
+
 第一次写这种类型的博客，总结的可能有些分散，建议结合开源库源码学习。
 
 
-###2.自定义注解相关
+
+### 自定义注解相关
 
 定义注解格式：   public @interface 注解名 {定义体}
 
@@ -67,7 +70,7 @@ Annotation里面的参数该设定:
 但当有多个参数时，不可以再使用value。
 
 	
-#####2.1 @Retention
+#### @Retention
 
 这个在第一章有讲。申明该注解属于什么类型注解
 
@@ -83,7 +86,7 @@ Annotation里面的参数该设定:
 
 	编译时注解，在编译时处理。
 	
-#####2.2 @Target(ElementType.TYPE)
+#### @Target(ElementType.TYPE)
 
 表示该注解用来修饰哪些元素。并可以修饰多个
 
@@ -138,8 +141,27 @@ Annotation里面的参数该设定:
 
 	包 
 	
+	
+#### @Inherited
 
-#####2.3 注解的默认值
+该注解的字面意识是继承，但你要知道**注解是不可以继承的**。
+
+@Inherited是在继承结构中使用的注解。
+
+如果你的注解是这样定义的：
+
+	@Inherited
+	@Retention(RetentionPolicy.CLASS)
+	@Target(ElementType.TYPE)
+	public @interface Test {
+		//...
+	}
+
+当你的注解定义到类A上，此时，有个B类继承A，且没使用该注解。但是扫描的时候，会把A类设置的注解，扫描到B类上。
+
+*这里感谢 豪哥 @刘志豪 的排疑解惑~*
+
+#### 注解的默认值
 
 注解可以设置默认值，有默认值的参数可以不写。
 
@@ -156,9 +178,9 @@ Annotation里面的参数该设定:
 	}
 
 
-#####2.4 “注解的继承”（依赖倒置？）
+#### “注解的继承”（依赖倒置？）
 
-这里讲的继承并不是通过@Inherited修饰的注解。（@Inherited这个元注解我研究了好久好像对编译时注解没什么用）
+这里讲的继承并不是通过@Inherited修饰的注解。
 
 这个“继承”是一个注解的使用技巧，使用上的感觉类似于依赖倒置，来自于ButterKnife源码。
 
@@ -190,16 +212,16 @@ Annotation里面的参数该设定:
 这样在做代码生成时，不需要再单独考虑每一个监听注解，只需要处理@ListenerClass就OK。
 
 
-###3.处理器类Processor编写
+### 处理器类Processor编写
 
 自定义注解后，需要编写Processor类处理注解。Processor继承自AbstractProcessor的类。
 
 AbstractProcessor有两个重要的方法需要重写。
 
-![](./1.jpeg)
+![](http://img1.ph.126.net/nIF8CZgyLscGMXPO0UdCkA==/6631820931164553739.jpg)
 
 
-#####3.1重写getSupportedAnnotationTypes方法：
+#### 重写getSupportedAnnotationTypes方法：
 
 通过重写该方法，告知Processor哪些注解需要处理。
 
@@ -225,7 +247,7 @@ AbstractProcessor有两个重要的方法需要重写。
 	
 	}
 	
-#####3.2重写process方法：
+#### 重写process方法：
 
 所有的注解处理都是从这个方法开始的，你可以理解为，当APT找到所有需要处理的注解后，会回调这个方法，你可以通过这个方法的参数，拿到你所需要的信息。
 
@@ -249,7 +271,7 @@ AbstractProcessor有两个重要的方法需要重写。
 
 **返回值** 表示这组 annotations 是否被这个 Processor 接受，如果接受（true）后续子的 pocessor 不会再对这个 Annotations 进行处理
 
-###4.输出Log
+### 输出Log
 
 虽然是编译时执行Processor,但也是可以输入日志信息用于调试的。
 
@@ -280,19 +302,33 @@ Processor支持最基础的System.out方法。
 
 他们的输出样式如图：
 
-(原谅我也不清楚为什么会输出两次，只是输出annotations size来看，第一次annotations是有值的，第二次annotations size变成了0)
 
 
-![](./3.jpeg)
 
-![](./2.jpeg)
+![](http://img2.ph.126.net/Ypp8bT2ykMm35CSoPqO4Lw==/6631566943978535174.jpg)
 
-#####注意：当没有属于该Process处理的注解被使用时，process不会执行。
+![](http://img1.ph.126.net/bdMUDuJ_8US-yfB2JJjQpA==/6631580138118067912.jpg)
 
-#####注意：如果发现替换jar后，apt代码并没有执行，尝试clean项目。
+**注意：当没有属于该Process处理的注解被使用时，process不会执行。**
+
+**注意：如果发现替换jar后，apt代码并没有执行，尝试clean项目。**
+
+这里你会发现输出了两次日志信息。其原因在于APT扫描了源码两次，可为什么要扫描两次？
+
+### 用生成的代码来生成代码
+
+APT可以扫描源码中的所有注解，依据这些注解来生成代码，那么生成的代码中如果也有注解呢？
+
+同样可以被扫描到，并且用于代码生成。其过程如下：
+
+APT第一次扫描源码中的所有注解，扫描结束后生成代码，之后再扫描一次，以保证生成的代码中的注解也可以被扫描到，第二次扫描到注解后继续生成代码，类似于递归一样的【扫描 - 代码生成 - 扫描 - 代码生成 - 扫描 - 代码生成 - 扫描 - 代码生成】。一直到扫描到的注解为0时停止。
+
+同样你肯定也会发现一个问题，这不很容易会变成死循环吗？
+
+**没错，所以在生成的代码中一定要慎重出现编译时注解，把控好你的代码逻辑！**
 
 
-###4.Element
+### Element
 
 Element也是APT的重点之一，所有通过注解取得元素都将以Element类型等待处理，也可以理解为Element的子类类型与自定义注解时用到的@Target是有对应关系的。
 
@@ -361,7 +397,7 @@ Element 可以直接强制转换为ExecutableElement。而其他类型的Element
 
 接下来我们将以@Target()分类进行讲解，不同Element的信息获取方式不同。
 
-###5.修饰方法的注解和ExecutableElement
+### 修饰方法的注解和ExecutableElement
 
 当你有一个注解是以@Target(ElementType.METHOD)定义时，表示该注解只能修饰方法。
 
@@ -413,7 +449,7 @@ Element 可以直接强制转换为ExecutableElement。而其他类型的Element
 	}
 
 
-###6.修饰属性、类成员的注解和VariableElement
+### 修饰属性、类成员的注解和VariableElement
 
 
 当你有一个注解是以@Target(ElementType.FIELD)定义时，表示该注解只能修饰属性、类成员。
@@ -444,7 +480,7 @@ Element 可以直接强制转换为ExecutableElement。而其他类型的Element
 	}
 	
 	
-###7.修饰类的注解和TypeElement
+### 修饰类的注解和TypeElement
 
 
 当你有一个注解是以@Target(ElementType.TYPE)定义时，表示该注解只能修饰类、接口、枚举。
@@ -470,3 +506,8 @@ Element 可以直接强制转换为ExecutableElement。而其他类型的Element
  		String superClassName = classElement.getSuperclass().toString();
         
 	}
+	
+	
+<br/>
+
+-------------

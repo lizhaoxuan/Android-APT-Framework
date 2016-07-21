@@ -18,9 +18,16 @@
 
 ==============
 
-###1.概述
+### 概述
 
-提到注解，普遍都会有两种态度：黑科技、低性能。使用注解往往可以实现用非常少的代码作出匪夷所思的事情，比如这些框架：ButterKnife、Retrofit。但一直被人诟病的是，运行时注解会因为java反射而引起较为严重的性能问题。
+**Android编译时注解框架从入门到项目实践**。该系列将通过5篇博客一步步教你打造一个属于自己的编译时注解框架，并在之后开源出基于APT的编译时注解框架。
+
+提到注解，普遍都会有两种态度：黑科技、低性能。使用注解往往可以实现用非常少的代码作出匪夷所思的事情，比如这些框架：ButterKnife、Retrofit。但一直被人诟病的是，运行时注解会因为java反射而引起较为严重的性能问题...
+
+
+
+<!-- more -->
+
 
 今天我们要讲的是，不会对性能有任何影响的黑科技：**编译时注解**。也有人叫它**代码生成**，其实他们还是有些区别的，在编译时对注解做处理，通过注解，获取必要信息，在项目中生成代码，运行时调用，和直接运行手写代码没有任何区别。而更准确的叫法：APT - Annotation Processing Tool
 
@@ -36,14 +43,14 @@
 
 
 
-###2.什么是注解
+### 什么是注解
 
 注解你一定不会陌生，这就是我们最常见的注解：
 
-![](./1.jpeg)
+![](http://7o4zmy.com1.z0.glb.clouddn.com/1.jpeg)
 
 
-首先注解分为三类，：
+首先注解分为三类：
 
 - 标准 Annotation
 
@@ -76,7 +83,7 @@
 
 
 
-###3.运行时注解的简单使用
+### 运行时注解的简单使用
 
 
 运行时注解的实质是，在代码中通过注解进行标记，运行时通过反射寻找标记进行某种处理。而运行时注解一直以来被呕病的原因便是反射的低效。
@@ -102,7 +109,7 @@
 
 那么这样的注解是怎么实现的呢？很简单，往下看。
 
-#####3.1创建一个注解
+#### 创建一个注解
 	
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ElementType.TYPE})
@@ -140,7 +147,7 @@ R.layout.activity_home实质是一个int型id，如果这样用就会报错：
 **关于注解的具体语法，这篇不在详述，统一放到《Android编译时注解框架-语法讲解》中**
 
 
-#####3.2 注解解析
+#### 注解解析
 
 注解申明好了，但具体是怎么识别这个注解并使用的呢？
 
@@ -180,7 +187,7 @@ R.layout.activity_home实质是一个int型id，如果这样用就会报错：
 
 第四步：为Activity设置布局。
 
-#####3.3 总结
+#### 总结
 
 相信你现在对运行时注解的使用一定有了一些理解了。也知道了运行时注解被人呕病的地方在哪了。
 
@@ -191,21 +198,25 @@ R.layout.activity_home实质是一个int型id，如果这样用就会报错：
 因为这篇博客的重点不是运行时注解，所以我们不对其源码进行解析。有兴趣的可以去github搜一下看看哦~话说AndroidEventBus还是我一个学长写得，haha~。
 
 
-###4.编译时注解框架ButterKnife源码初探
+
+
+
+
+### 编译时注解框架ButterKnife源码初探
 
 ButterKnife大家应该都很熟悉的吧，9000多颗start，让我们彻底告别了枯燥的findViewbyId。它的使用方式是这样的：
 
-![](./2.jpeg)
+![](http://7o4zmy.com1.z0.glb.clouddn.com/2.jpeg)
 
 你难道就没有好奇过，它是怎么实现的吗？嘿嘿，这就是编译时注解-代码生成的黑科技所在了。
 
 秘密在这里，编译工程后，打开你的项目app目录下的build目录：
 
-![](./3.jpeg)
+![](http://7o4zmy.com1.z0.glb.clouddn.com/3.jpeg)
 
 你可以看到一些带有*$$ViewBinder*后缀的类文件。这个就是ButterKnife生成的代码我们打开它：
 
-![](./5.jpeg)
+![](http://7o4zmy.com1.z0.glb.clouddn.com/5.jpeg)
 
 
 
@@ -260,32 +271,32 @@ OK，现在你大致明白了ButterKnife的秘密了吧？通过自动生成代�
 2.Finder到底是个什么东西？凭什么它可以找到view。
 
 不着急不着急，慢慢看。
-#####4.1 注解: @Bind的定义
+#### 注解: @Bind的定义
 
-![](./6.jpeg)
+![](http://7o4zmy.com1.z0.glb.clouddn.com/6.jpeg)
 
 我们可以解读的信息如下：
 
-1.Bind是编译时注解
+1. Bind是编译时注解
 
-2.只能修饰属性
+2. 只能修饰属性
 
-3.属性值是一个int型的数组。
+3. 属性值是一个int型的数组。
 
 
 创建好自定义注解，之后我们就可以通过APT去识别解析到这些注解，并且可以通过这些注解得到注解的值、注解所修饰的类的类型、名称。注解所在类的名称等等信息。
 
-#####4.2 Finder类
+#### Finder类
 
 通过上面生成的代码，你一定奇怪，Finder到底是个什么东西。Finder实际是一个枚举。
 
-![](./8.jpeg)
+![](http://7o4zmy.com1.z0.glb.clouddn.com/8.jpeg)
 
 根据不同类型的，提供了不同实现的findView和getContext方法。这里你终于看到了熟悉的findViewById了吧，哈哈，秘密就在这里。
 
 另外Finder还有两个重要的方法，也是刚才没有介绍清楚的： *finder.findRequiredView* 和 *finder.castView*
 
-![](./9.jpeg)
+![](http://7o4zmy.com1.z0.glb.clouddn.com/9.jpeg)
 
 
 findRequiredView 方法调用了 findOptionalView 方法
@@ -298,13 +309,13 @@ castView上来啥都不干直接强转并return。如果发生异常，就执行
 
 
 
-#####4.3 ButterKnife.bind(this)方法
+#### ButterKnife.bind(this)方法
 
 *ButterKnife.bind(this)*这个方法我们通常都在BaseActivity的onCreate方法中调用，似乎所有的findViewById方法，都被这一个bind方法化解了~
 
 bind有几个重载方法，但最终调的都是下面这个方法。
 
-![](./7.jpeg)
+![](http://7o4zmy.com1.z0.glb.clouddn.com/7.jpeg)
 
 参数target一般是我们的Activity，source是用来获取Context查找资源的。当target是activity时，Finder是Finder.ACTIVITY。
 
@@ -315,16 +326,16 @@ bind有几个重载方法，但最终调的都是下面这个方法。
 然后就没有啦~看到这里你就大致明白了在程序运行过程中ButterKnife的实现原理了。下面上重头戏，ButterKnife编译时所做的工作。
 
 
-#####4.4 ButterKnifeProcessor
+#### ButterKnifeProcessor
 
 你可能在疑惑，ButterKnife是如何识别注解的，又是如何生成代码的。
 
-![](./10.jpeg)
+![](http://7o4zmy.com1.z0.glb.clouddn.com/10.jpeg)
 
 AbstractProcessor是APT的核心类，所有的黑科技，都产生在这里。AbstractProcessor只有两个最重要的方法process 和 getSupportedAnnotationTypes。
 
 
-![](./11.jpeg)
+![](http://7o4zmy.com1.z0.glb.clouddn.com/11.jpeg)
 
 重写getSupportedAnnotationTypes方法，用来表示该AbstractProcessor类处理哪些注解。
 
@@ -333,7 +344,7 @@ AbstractProcessor是APT的核心类，所有的黑科技，都产生在这里。
 而所有的注解处理，都是在process中执行的：
 
 
-![](./12.jpeg)
+![](http://7o4zmy.com1.z0.glb.clouddn.com/12.jpeg)
 
 通过findAndParseTargets方法拿到所有需要被处理的注解集合。然后对其进行遍历。
 
@@ -346,7 +357,7 @@ JavaFileObject是我们代码生成的关键对象，它的作用是写java文�
 ForgetActivity$$ViewBinder中所有代码，都是通过bindingClass.brewJava方法拼出来的。
 
 
-#####4.5 bindingClass.brewJava方法
+#### bindingClass.brewJava方法
 
 哎，我不知道你看到这个代码时候，是什么感觉。反正我看到这个时候脑袋里只有一句话：好low啊……
 
@@ -356,10 +367,10 @@ ForgetActivity$$ViewBinder中所有代码，都是通过bindingClass.brewJava方
 
 由此，你也知道了之前看生成的代码，为什么是用了偷懒的方法写了吧~
 
-![](./13.jpeg)
+![](http://7o4zmy.com1.z0.glb.clouddn.com/13.jpeg)
 
 
-###总结
+### 总结
 
 当你揭开一个不熟悉领域的面纱后，黑科技好像也不过如此，甚至用字符串拼接出来的代码感觉lowlow的。
 
@@ -367,21 +378,19 @@ ForgetActivity$$ViewBinder中所有代码，都是通过bindingClass.brewJava方
 
 好了，总结一下。
 
-1.编译时注解的魅力在于：编译时按照一定策略生成代码，避免编写重复代码，提高开发效率，且不影响性能。
+1. 编译时注解的魅力在于：编译时按照一定策略生成代码，避免编写重复代码，提高开发效率，且不影响性能。
 
-2.代码生成与代码插入（Aspectj）是有区别的。代码插入面向切面，是在代码运行前后插入代码，新产生的代码是由原有代码触发的。而代码生成只是自动产生一套独立的代码，代码的执行还是需要主动调用才可以。
+2. 代码生成与代码插入（Aspectj）是有区别的。代码插入面向切面，是在代码运行前后插入代码，新产生的代码是由原有代码触发的。而代码生成只是自动产生一套独立的代码，代码的执行还是需要主动调用才可以。
 
-3.APT是一套非常强大的机制，它唯一的限制在于你天马行空的设计~
+3. APT是一套非常强大的机制，它唯一的限制在于你天马行空的设计~
 
-4.ButterKnife的原理其实很简单，可是为什么这么简单的功能，却写了那么多代码呢？因为ButterKnife作为一个外部依赖框架，做了大量的容错和效验来保证运行稳定。所以：**写一个框架最难的不是技术实现，而是稳定！**
+4. ButterKnife的原理其实很简单，可是为什么这么简单的功能，却写了那么多代码呢？因为ButterKnife作为一个外部依赖框架，做了大量的容错和效验来保证运行稳定。所以：**写一个框架最难的不是技术实现，而是稳定！**
 
-5.ButterKnife有一个非常值得借鉴的地方，就是如何用生成的代码对已有的代码进行代理执行。这个如果你在研究有代理功能的APT框架的话，应该好好研究一下。
+5. ButterKnife有一个非常值得借鉴的地方，就是如何用生成的代码对已有的代码进行代理执行。这个如果你在研究有代理功能的APT框架的话，应该好好研究一下。
 
 APT就好像一块蛋糕摆在你面前，就看你如何优雅的吃了。
 
 后续篇章我将会陆续推出几款以Cake命名的APT框架。
-
-
 
 
 

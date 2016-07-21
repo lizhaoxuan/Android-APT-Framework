@@ -18,13 +18,17 @@
 
 ==============
 
-###1.概述
+### 概述
 
 因为编译时注解框架前期项目搭建部分需要较多的图文讲解，所以前一章《Android编译时注解框架-Run Demo》只是实现了最简单应用，或许注解信息，并没有生成代码。
 
 本章将以生成代码为重点进行一个案例讲解。
 
-#####框架名称：OnceClick
+
+<!-- more -->
+
+
+### 框架名称：OnceClick
 
 **框架功能：**功能就是它的名字：在一定时间内，按钮点击事件只能执行一次。未到指定时间，不执行点击事件。
 
@@ -35,7 +39,7 @@
 OK，这是一个功能非常简单的小型类库。下面我们来实现它。
 
 
-###2.项目搭建
+### 项目搭建
 
 具体的项目搭建细节前一章已经有了介绍，这里不再讲述。
 
@@ -51,11 +55,11 @@ apt：java Library.负责代码生成。编译成apt-jar包供外部使用
 
 onceclick：Android Library. OnceClick是我们真正对外发布并交由第三方使用的库，它引用了apt-jar包
 
-![](./5.jpeg)
+![](http://img0.ph.126.net/vHtdAVys2C-kIyWETwdaOw==/6631583436652950849.jpeg)
 
 
 
-###3.OnceClick使用
+### OnceClick使用
 
 	public class MainActivity extends AppCompatActivity {
 
@@ -66,8 +70,8 @@ onceclick：Android Library. OnceClick是我们真正对外发布并交由第三
     	protected void onCreate(Bundle savedInstanceState) {
     	    super.onCreate(savedInstanceState);
     	    setContentView(R.layout.activity_main);
-        	//类似于ButterKnife的Bind方法。初始化OnceClick
-    	    OnceInit.once(this);
+        	//类似于ButterKnife的Bind方法。初始化OnceClick,并设置点击事件间隔是2秒
+    	    OnceInit.once(this,2000);
     	    text = (TextView)findViewById(R.id.textView);
     	}
 
@@ -86,10 +90,10 @@ onceclick：Android Library. OnceClick是我们真正对外发布并交由第三
 	
 在我连续点击按钮的情况下，可以看到日志一定是要2秒以上才会执行点击事件。
 	
-![](./3.jpeg)
+![](http://img0.ph.126.net/fiUsxAgW_ezfR7CEntOavw==/6631599929327368401.jpeg)
 
 
-###4.生成后代码
+### 生成后代码
 
 	// Generated code from OnceClick. Do not modify!
 	package com.lizhaoxuan.onceclickdemo;
@@ -146,9 +150,9 @@ onceclick：Android Library. OnceClick是我们真正对外发布并交由第三
 
 ================
 
-**OnceClick Module:**
+### OnceClick Module
 
-###1.OnceInit.once
+#### OnceInit.once
 
 看到OnceClick的使用和生成后的代码你可能会有一点疑惑他们之间是如何联系在一起的。看下*OnceInit.java*一目了然，我在注释中做讲解:
 
@@ -204,7 +208,7 @@ onceclick：Android Library. OnceClick是我们真正对外发布并交由第三
 
 
 
-###2.AbstractInjector
+#### AbstractInjector
 代理类接口，所有生成代码类都要实现这个接口。
 
 inject方法用于实现代理代码。
@@ -219,7 +223,7 @@ setIntervalTime设置点击事件执行间隔时间。
 	}
 
 
-###3.Finder
+#### Finder
 
 Finder的作用是根据不同的类型，去实现不同的findViewById方法。
 
@@ -241,9 +245,9 @@ Finder的作用是根据不同的类型，去实现不同的findViewById方法�
 
 ================
 
-**APT MODULE：**
+### APT MODULE
 
-###1.自定义注解
+#### 自定义注解
 
 	@Retention(RetentionPolicy.CLASS)
 	@Target(ElementType.METHOD)
@@ -255,16 +259,16 @@ Finder的作用是根据不同的类型，去实现不同的findViewById方法�
 OnceClick只有一个默认参数，用来设置View的Id。
 
 
-###2.配置文件
+#### 配置文件
 
 编写文件javax.annotation.processing.Processor。
 
 	com.example.OnceClickProcessor
 	
-![](./2.jpeg)
+![](http://img0.ph.126.net/Fjmfygapp7D_zJXmxjru3A==/6631569143001790392.jpeg)
 
 
-###3.Process类-getSupportedAnnotationTypes
+#### Process类-getSupportedAnnotationTypes
 
 	@Override
     public Set<String> getSupportedAnnotationTypes() {
@@ -274,7 +278,7 @@ OnceClick只有一个默认参数，用来设置View的Id。
     }
     
 
-###4.Process类-process方法
+#### Process类-process方法
 
 重点来啦。这里需要讲一个概念。
 
@@ -305,7 +309,7 @@ OnceClick只有一个默认参数，用来设置View的Id。
 
 总结一下：编译时，取得所有需要生成的代理类信息。遍历代理类集合，根据代理类信息，生成代码。
 
-###5.ProxyInfo代理类
+#### ProxyInfo代理类
 
 其实这个类，才是这个框架的重中之重，因为生成什么代码，全靠这个类说了算。这个类也没什么好讲的，就是用StringBuidler拼出一个类来。ProxyInfo保存的是类信息，方法信息我们用List<OnceMethod> methods保存。**然后根据这些信息生成类。**
 
@@ -422,7 +426,7 @@ OnceClick只有一个默认参数，用来设置View的Id。
 	}
 
 
-###6.OnceMethod类
+#### OnceMethod类
 
 需要讲的一点是，每一个使用了@OnceClick注解的Activity或View，都会为其生成一个代理类，而一个代理中有可能有很多个@OnceClick修饰的方法，所以我们专门为每个方法有创建了一个javaBean用于保存方法信息:
 
@@ -456,7 +460,7 @@ OnceClick只有一个默认参数，用来设置View的Id。
     
     }
 
-###7.getProxyMap方法
+#### getProxyMap方法
 
 getProxyMap其实也很简单的。通过注释就可以理解。
 
@@ -491,7 +495,7 @@ getProxyMap其实也很简单的。通过注释就可以理解。
         return proxyMap;
     }
 
-###8.writeCode方法
+#### writeCode方法
 
 writeCode方法用来生成代码文件，这个方法的代码相对固定，基本不用该，就是这样的。
 
@@ -526,6 +530,28 @@ writeCode方法用来生成代码文件，这个方法的代码相对固定，�
     }
 
 
+
+### 结论
+
+这里可能会有一个疑问，一个Activity里不同的按钮不可以设置不同的点击事件间隔时间么？
+
+	//类似于ButterKnife的Bind方法。初始化OnceClick,并设置点击事件间隔是2秒
+	OnceInit.once(this,2000);
+	
+技术上是可以实现的，但作为一个第三方框架，一个不能忽视的因素就是使用体验。
+
+每一个控件单独设值的体验并不是很好，因为注解只有一个属性的时候可以直接这样用：
+
+	@OnceClick(R.id.btn)
+如果有两个属性，就必须要带名字了 
+
+	@OnceClick(id = R.id.btn)
+
+最后在把源码地址再放一下 [https://github.com/lizhaoxuan/OnceClick](https://github.com/lizhaoxuan/OnceClick)。看着Demo学习会更快！
+
+</br>
+
+--------
 
 
 

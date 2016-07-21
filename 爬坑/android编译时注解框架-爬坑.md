@@ -18,7 +18,7 @@
 
 ==============
 
-###概述
+### 概述
 
 因为有关APT的资料过少，又因为是Java Moudle +Android Moudle的使用方式，在项目编写过程中，会有一些匪夷所思的奇怪问题~入门阶段真的是步履维艰。
 
@@ -26,19 +26,21 @@
 
 随时踩坑，随时更新~
 
+<!-- more -->
 
-###坑1：无法引入javax包下的类库
+
+### 坑1：无法引入javax包下的类库
 
 编写编译时注解框架时，需要用到javax包下的一些类库，但是引入包时却提示没有。
 
-![](./2.jpeg)
+![](http://img1.ph.126.net/31LiF8uDczvrBRXGdUS3sA==/6631518565466913139.jpeg)
 
 
 #####解决：javax包属于java,Android核心库中没有。所以不能直接在app Module和Android Library中使用，必须要创建一个Java Library。然后由Java Library导出jar包使用。
 
-==============
+----------------
 
-###坑2：Build通过，编译失败
+### 坑2：Build通过，编译失败
 
 报错信息： **finished with non-zero exit value 2**
 
@@ -46,7 +48,7 @@
 	> com.android.build.api.transform.TransformException: com.android.ide.common.process.ProcessException: java.util.concurrent.ExecutionException: com.android.ide.common.process.ProcessException: org.gradle.process.internal.ExecException: Process 'command '/Library/Java/JavaVirtualMachines/jdk1.7.0_79.jdk/Contents/Home/bin/java'' finished with non-zero exit value 2
 
 
-![](./1.jpeg)
+![](http://img0.ph.126.net/wKyp9tTXrwzlx7JyoMhu-g==/6631819831652925888.jpg)
 
 	
 这个问题引起了很大程度的误解，因为是看错误信息是jdk的错误，关注点一直放到了jdk版本上。
@@ -55,9 +57,9 @@
 
 #####解决： app Moudle不能直接引用 apt Module（编写注解处理代码的Module），需要apt Module导出jar包，app Moudle引入jar包才可以。
 
-==============
+----------------
 
-###坑3：只能成功运行一次，修改代码后再运行就报错
+### 坑3：只能成功运行一次，修改代码后再运行就报错
 
 报错内容同 **坑2** 相同。
 
@@ -65,9 +67,9 @@ app Moudle直接引用 apt Module 可以成功运行一次，但再次修改apt 
 
 #####解决： app Moudle不能直接引用 apt Module（编写注解处理代码的Module），需要apt Module导出jar包，app Moudle引入jar包才可以。
 
-==============
+----------------
 
-###坑4：错误: javax.annotation.processing.Processor: Error reading configuration file时抛出异常错误
+### 坑4：错误: javax.annotation.processing.Processor: Error reading configuration file时抛出异常错误
 
 
 错误提示：
@@ -76,9 +78,9 @@ app Moudle直接引用 apt Module 可以成功运行一次，但再次修改apt 
 
 #####解决： app Moudle不能直接引用 apt Module（编写注解处理代码的Module），需要apt Module导出jar包，app Moudle引入jar包才可以。
 
-==============
+----------------
 
-###坑5：成功运行，没有任何报错，但也没有任何预期结果。
+### 坑5：成功运行，没有任何报错，但也没有任何预期结果。
 
 这是比较容易忽视的两个问题。
 
@@ -90,13 +92,14 @@ app Moudle直接引用 apt Module 可以成功运行一次，但再次修改apt 
 
 重写该方法告诉*Processor*它需要处理哪些注解。
 	
-==============
+----------------
 	
-###坑6：替换APT jar包后，apt代码并没有被执行。
+### 坑6：替换APT jar包后，apt代码并没有被执行。
 
 #####解决： 尝试 clean项目 ，并重新编译。
 	
-==============
+----------------
+
 	
 	
 	
