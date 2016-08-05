@@ -4,6 +4,8 @@
 
 Android编译时注解框架系列博客。
 
+博客地址，阅读体验更好 ： (https://lizhaoxuan.github.io)[https://lizhaoxuan.github.io]
+
 APT入门到项目实践。
 
 最后基于APT写了两个框架
