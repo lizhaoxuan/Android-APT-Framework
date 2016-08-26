@@ -22,6 +22,9 @@ public class CakeProcessor extends AbstractProcessor {
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment env) {
         Messager messager = processingEnv.getMessager();
+        int size = env.getElementsAnnotatedWith(GetMsg.class).size();
+        messager.printMessage(Diagnostic.Kind.NOTE,
+                "Annotation class size = " + size);
         for (Element element : env.getElementsAnnotatedWith(GetMsg.class)) {
             PackageElement packageElement = (PackageElement) element
                     .getEnclosingElement();
